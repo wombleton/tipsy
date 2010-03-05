@@ -1,4 +1,6 @@
-       
+       <script type='text/javascript' src="http://localhost:8888/admin/lib/jquery.js?v=1.4.32-SNAPSHOT"></script>
+
+       <script type='text/javascript' src="javascripts/jquery.tipsy.js"></script>
 <script type='text/javascript'>
   $(function() {
     
@@ -16,7 +18,16 @@
     $('#example-custom-attribute').tipsy({title: 'id'});
     $('#example-callback').tipsy({title: function() { return this.getAttribute('original-title').toUpperCase(); } });
     $('#example-fallback').tipsy({fallback: "Where's my tooltip yo'?" });
-    
+
+    $('#example-delay').tipsy({ delayIn: 0.5, delayOut: 1 });
+
+    $('#example-triggered').tipsy({ trigger: 'TRIGGERED!' })
+    $('#example-triggered').toggle(function() {
+       $(this).trigger('tipsy-show');
+    }, function() {
+       $(this).trigger('tipsy-hide');
+    });
+
     $('#example-html').tipsy({html: true });
     
   });
@@ -135,7 +146,14 @@ an anchor tag's title attribute.</p>
 <pre class='code'>$('#example-delay').tipsy({ delayIn: 0.5, delayOut: 1 });</pre>
 
 <p>
-	<a id='example-html' title='display is delayed by 0.5s, hiding by 1s' href='#'>Hover over me</a>
+	<a id='example-delay' title='display is delayed by 0.5s, hiding by 1s' href='#'>Hover over me</a>
+</p>
+
+<div class="caption">Trigger example:</div>
+<pre class='code'>$('#example-triggered').tipsy({ trigger: 'TRIGGERED!tr' });</pre>
+
+<p>
+	<a id='example-triggered' href='#'>Click me!</a>
 </p>
 
 <h2 id="options">Options</h2>

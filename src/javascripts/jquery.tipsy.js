@@ -4,18 +4,36 @@
             $ele.attr('original-title', $ele.attr('title') || '').removeAttr('title');
         }
     }
-    
+
+
     $.fn.tipsy = function(options) {
 
         options = $.extend({}, $.fn.tipsy.defaults, options);
-        
+
         return this.each(function() {
             
             fixTitle($(this));
             var opts = $.fn.tipsy.elementOptions(this, options);
             var timeout = null;
-            
-            $(this).hover(function() {
+
+            function hide() {
+                var self = this;
+                $.data(self, 'cancel.tipsy', false);
+                clearTimeout(timeout);
+                setTimeout(function() {
+                    if ($.data(self, 'cancel.tipsy')) {
+                        return;
+                    }
+                    var tip = $.data(self, 'active.tipsy');
+                    if (opts.fade) {
+                        tip.stop().fadeOut(function() { $(self).remove(); });
+                    } else if (tip) {
+                        tip.remove();
+                    }
+                }, opts.delayOut * 1000);
+            }
+
+            function show(event, title) {
                 var self = this;
                 timeout = setTimeout(function() {
                     $.data(self, 'cancel.tipsy', true);
@@ -29,8 +47,9 @@
 
                     fixTitle($(self));
 
-                    var title;
-                    if (typeof opts.title == 'string') {
+                    if (title || opts.trigger) {
+                        title = title || (typeof opts.trigger == 'function') ? opts.trigger.call(self) : opts.trigger;
+                    } else if (typeof opts.title == 'string') {
                         title = $(self).attr(opts.title == 'title' ? 'original-title' : opts.title);
                     } else if (typeof opts.title == 'function') {
                         title = opts.title.call(self);
@@ -65,25 +84,14 @@
                         tip.css({visibility: 'visible', opacity: opts.opacity});
                     }
                 }, opts.delayIn * 1000);
-
-            }, function() {
-                $.data(this, 'cancel.tipsy', false);
-                var self = this;
-                clearTimeout(timeout);
-                setTimeout(function() {
-                    if ($.data(this, 'cancel.tipsy')) return;
-                    var tip = $.data(self, 'active.tipsy');
-                    if (opts.fade) {
-                        tip.stop().fadeOut(function() { $(this).remove(); });
-                    } else if (tip) {
-                        tip.remove();
-                    }
-                }, opts.delayOut * 1000);
-
-            });
-            
+            }
+            if (!opts.trigger) {
+                $(this).hover(show, hide);
+            }
+            $(this).bind('tipsy-show', show);
+            $(this).bind('tipsy-hide', hide);
         });
-        
+
     };
     
     // Overwrite this method to provide options on a per-element basis.
@@ -101,6 +109,7 @@
         fallback: '',
         gravity: 'n',
         html: false,
+        trigger: false,
         opacity: 0.8,
         title: 'title'
     };
